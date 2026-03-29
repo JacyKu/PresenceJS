@@ -1,0 +1,2 @@
+org.presencejs.presencejs.kubejs.PresenceJSKubeJSPlugin
+

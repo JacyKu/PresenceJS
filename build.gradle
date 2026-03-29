@@ -1,0 +1,225 @@
+import groovy.json.JsonOutput
+
+plugins {
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'maven-publish'
+    id 'com.diffplug.spotless' version '5.14.0'
+}
+
+base {
+    archivesName = project.archives_base_name
+}
+
+version = System.getenv('MOD_VERSION') ?: project.mod_version
+group = project.maven_group
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+jarJar.enable()
+
+def discordRpcVersion = '1.0.4'
+def discordRpcJarJarRange = '[1.0.4,1.0.5)'
+def generatedJarJarResourcesDir = file("$buildDir/generated/resources/jarjar")
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'Architectury'
+        url = 'https://maven.architectury.dev/'
+    }
+    maven {
+        name = 'Latvian Maven'
+        url = 'https://maven.latvian.dev/releases'
+    }
+    maven {
+        name = 'JitPack'
+        url = 'https://jitpack.io'
+    }
+    maven {
+        name = 'Forge'
+        url = 'https://maven.minecraftforge.net/'
+    }
+    maven {
+        name = 'FDD Maven'
+        url = 'https://maven.firstdark.dev/releases'
+    }
+    maven {
+        name = 'ParchmentMC'
+        url = 'https://maven.parchmentmc.org/'
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+
+    compileOnly fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
+    runtimeOnly fg.deobf("dev.architectury:architectury-forge:${project.architectury_version}")
+
+    compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${project.kubejs_version}")
+    runtimeOnly fg.deobf("dev.latvian.mods:kubejs-forge:${project.kubejs_version}")
+    compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${project.rhino_version}")
+    runtimeOnly fg.deobf("dev.latvian.mods:rhino-forge:${project.rhino_version}")
+
+    implementation "dev.firstdark.discordrpc:discord-rpc:${discordRpcVersion}"
+    jarJar "dev.firstdark.discordrpc:discord-rpc:${discordRpcJarJarRange}"
+}
+
+def replaceProperties = [
+        version                : project.version,
+        mod_id                 : project.mod_id,
+        mod_name               : project.mod_name,
+        mod_license            : project.mod_license,
+        mod_authors            : project.mod_authors,
+        mod_description        : project.mod_description,
+        loader_version_range   : project.loader_version_range,
+        forge_version_range    : project.forge_version_range,
+        minecraft_version_range: project.minecraft_version_range,
+        kubejs_version_range   : project.kubejs_version_range
+]
+
+tasks.register('prepareDiscordRpcDevJarJar') {
+    inputs.files(configurations.jarJar)
+    outputs.dir(generatedJarJarResourcesDir)
+
+    doLast {
+        File outputDir = generatedJarJarResourcesDir
+        File jarJarDir = new File(outputDir, 'META-INF/jarjar')
+        delete(outputDir)
+        jarJarDir.mkdirs()
+
+        File discordRpcJar = configurations.jarJar.resolve().find { it.name.startsWith('discord-rpc-') && it.name.endsWith('.jar') }
+        if (discordRpcJar == null) {
+            throw new GradleException('Could not resolve discord-rpc jar for dev jar-in-jar resources')
+        }
+
+        copy {
+            from(discordRpcJar)
+            into(jarJarDir)
+        }
+
+        File metadataFile = new File(jarJarDir, 'metadata.json')
+        metadataFile.text = JsonOutput.prettyPrint(JsonOutput.toJson([
+                jars: [[
+                        identifier  : [group: 'dev.firstdark.discordrpc', artifact: 'discord-rpc'],
+                        version     : [range: discordRpcJarJarRange, artifactVersion: discordRpcVersion],
+                        path        : "META-INF/jarjar/${discordRpcJar.name}",
+                        isObfuscated: false
+                ]]
+        ])) + System.lineSeparator()
+    }
+}
+
+processResources {
+    dependsOn tasks.named('prepareDiscordRpcDevJarJar')
+    inputs.properties(replaceProperties)
+
+    filesMatching('META-INF/mods.toml') {
+        expand replaceProperties
+    }
+
+    from(generatedJarJarResourcesDir)
+}
+
+minecraft {
+    mappings channel: 'parchment', version: "${project.parchment_version}-${project.minecraft_version}"
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${project.buildDir}/createSrgToMcp/output.srg"
+
+            mods {
+                "${project.mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+            arg '--nogui'
+        }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+jar {
+    archiveClassifier = 'slim'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from('LICENSE') {
+        rename { "${it}_${project.archives_base_name}" }
+    }
+
+    exclude 'META-INF/MANIFEST.MF', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+}
+
+tasks.named('jarJar').configure {
+    archiveClassifier = ''
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from('LICENSE') {
+        rename { "${it}_${project.archives_base_name}" }
+    }
+
+    exclude 'META-INF/MANIFEST.MF', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+}
+
+tasks.named('assemble').configure {
+    dependsOn tasks.named('jarJar')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+    }
+}
+
+spotless {
+    format 'misc', {
+        target '*.gradle', '*.md', '.gitignore'
+
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+
+    java {
+        importOrder()
+        eclipse()
+        indentWithSpaces()
+        endWithNewline()
+        licenseHeaderFile 'license_header.java'
+    }
+}
+
+tasks.matching { it.name.startsWith('spotless') }.configureEach {
+    enabled = false
+}
+
