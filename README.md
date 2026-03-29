@@ -16,13 +16,9 @@ It uses a pure-Java Discord RPC backend designed for Minecraft mods rather than 
   - timestamps
   - large/small images
   - buttons
-  - party data
-  - join / spectate / match secrets
 - Emits KubeJS events for:
   - presence building
   - Discord ready/disconnect lifecycle
-  - Discord join / spectate callbacks
-  - Discord join requests
 
 ## Requirements
 
@@ -73,57 +69,6 @@ PresenceJS adds a client-side global binding named `PresenceJS` and an event gro
 - `PresenceJSEvents.join(event => {})`
 - `PresenceJSEvents.spectate(event => {})`
 - `PresenceJSEvents.joinRequest(event => {})`
-
-## Example KubeJS script
-
-Edit the included file `kubejs/client_scripts/presence.js`:
-
-```js
-PresenceJSEvents.build(event => {
-  const ctx = event.context
-  const presence = event.presence
-
-  presence.setClientId('123456789012345678')
-  presence.setActivityType('PLAYING')
-
-  if (!ctx.inWorld) {
-    presence.setDetails('Browsing menus')
-    presence.setState(ctx.screenTitle || 'Idle')
-    presence.setLargeImage('main_menu', 'Main Menu')
-    presence.clearButtons()
-    return
-  }
-
-  presence.setDetails(ctx.singleplayer ? 'Custom Singleplayer' : 'Custom Multiplayer')
-  presence.setState((ctx.worldName || ctx.serverName || 'Unknown world') + ' • ' + (ctx.dimensionId || 'minecraft:overworld'))
-  presence.setLargeImage('minecraft_logo', ctx.biomeId || 'Minecraft')
-  presence.setSmallImage('pickaxe', ctx.selectedItemName || 'Exploring')
-  presence.setStartTimestamp(ctx.worldStartEpochSecond)
-  presence.clearButtons()
-  presence.addButton('GitHub', 'https://github.com/')
-  presence.addButton('Docs', 'https://kubejs.com/')
-})
-
-PresenceJSEvents.joinRequest(event => {
-  console.info(`Discord join request from ${event.user?.effectiveName || 'unknown user'}`)
-  event.approve()
-})
-```
-
-## Building
-
-If the Gradle wrapper is intact in your environment, build with:
-
-```powershell
-.\gradlew.bat build
-```
-
-## Notes
-
-- PresenceJS is intentionally **client-side only**.
-- If KubeJS is not installed, PresenceJS still provides automatic Rich Presence behavior from the client config.
-- Discord Rich Presence images and buttons only work when your Discord application is configured correctly.
-
 
 
 
