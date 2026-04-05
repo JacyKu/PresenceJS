@@ -61,15 +61,5 @@ PresenceJS adds a client-side global binding named `PresenceJS` and an event gro
 - `PresenceJS.refresh()`
 - `PresenceJS.disconnect()`
 
-### Client events
-
-- `PresenceJSEvents.build(event => {})`
-- `PresenceJSEvents.ready(event => {})`
-- `PresenceJSEvents.disconnected(event => {})`
-- `PresenceJSEvents.join(event => {})`
-- `PresenceJSEvents.spectate(event => {})`
-- `PresenceJSEvents.joinRequest(event => {})`
-
-
 
 
