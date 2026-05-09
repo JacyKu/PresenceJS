@@ -66,15 +66,10 @@ PresenceJS adds a client-side global binding named `PresenceJS` and an event gro
 Below is a clientside KubeJS script used in [Splendid Ranching](https://github.com/Deepacat/Splendid-Ranching)
 
 ```javascript
-// PresenceJS client script for KubeJS
-// server_scripts/discordPresenceServer.js includes the network data sent
-
-let $I18n = Java.loadClass('net.minecraft.client.resources.language.I18n')
-
 const USER_SETTINGS = {
     appId: '1487269951512248350',
     activityName: 'Splendid Ranching',
-    packVersion: 'DEV',
+    packVersion: JsonIO.read('kubejs/splendidRanchingData.json')['version'],
     imageKeys: {
         large: 'menu',
         small: 'curseforgeicon'
@@ -220,8 +215,8 @@ if (PRESENCE_OPTIONS.useServerRPCStats) {
     })
 }
 
-NetworkEvents.dataReceived('kubejs:slime_value_data', event => {
-    SLIME_VALUE_DATA = event.data || {}
+NetworkEvents.dataReceived('kubejs:slime_value_data', e => {
+    SLIME_VALUE_DATA = e.data || {}
 })
 
 function getHotPlortStatus() {
@@ -235,10 +230,10 @@ function getHotPlortStatus() {
     const [breedId, plortData] = hotPlorts[0]
 
     let fluc = plortData.flucPercent
-    let flucText = fluc > 0 ? `+${fluc}% :)` : `${fluc}% :(`
+    let flucText = fluc >= 0 ? `+${fluc}% :)` : `${fluc}% :(`
     return {
         details: `Hot Plort: ${getLocalizedPlortName(breedId)} (${formatBalance(plortData.currentValue)}¤ / ${formatSignedPercent(plortData.multPercent)})`,
-        state: `fluc: ${flucText}`
+        state: `Market fluctuation: ${flucText}`
     }
 }
 
@@ -393,38 +388,3 @@ PresenceJSEvents.disconnected(event => {
     console.info(`[PresenceJS] Discord disconnected: ${event.getMessage()}`)
 })
 ```
-
-The KubeJS serverside script:
-
-```javascript
-// Simple Discord Rich network bridge for PresenceJS.
-
-/**
- * @param {Internal.SimplePlayerEventJS} e
- */
-function updateRPC(e) {
-    let account = getNumismaticAccount(e.player)
-    let balance = account.balance
-
-    let day = Math.round(e.server.getLevel('minecraft:overworld').dayTime() / 24000)
-    let collection = getSlimeCollectionData(e.player)
-
-    let dataObj = {
-        balance: balance,
-        day: day,
-        collection: collection
-    }
-
-    e.player.sendData('kubejs:rpc', dataObj)
-}
-
-PlayerEvents.loggedIn(e => {
-    updateRPC(e)
-})
-
-PlayerEvents.tick(e => {
-    if (Utils.server.tickCount % (20 * 10) != 0) { return }
-    updateRPC(e)
-})
-```
-
