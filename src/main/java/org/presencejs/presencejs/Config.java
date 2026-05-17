@@ -27,6 +27,9 @@ public final class Config {
     private static final ForgeConfigSpec.BooleanValue VERBOSE_LOGGING = BUILDER
             .comment("Enable verbose logging from the Discord IPC library.")
             .define("verboseLogging", false);
+    private static final ForgeConfigSpec.BooleanValue WEBHOOK_ENABLED = BUILDER
+            .comment("Enable Discord webhook HTTP functionality exposed through PresenceJS and KubeJS.")
+            .define("webhookEnabled", false);
     private static final ForgeConfigSpec.ConfigValue<String> DEFAULT_ACTIVITY_TYPE = BUILDER
             .comment("Default Discord activity type. Valid values include PLAYING, STREAMING, LISTENING, WATCHING, CUSTOM, and COMPETING.")
             .define("defaultActivityType", "PLAYING");
@@ -75,6 +78,7 @@ public final class Config {
     public static boolean autoRegister;
     public static boolean debugLogging;
     public static boolean verboseLogging;
+        public static boolean webhookEnabled;
     public static String defaultActivityType;
     public static int updateIntervalTicks;
     public static int reconnectIntervalTicks;
@@ -104,6 +108,7 @@ public final class Config {
         autoRegister = AUTO_REGISTER.get();
         debugLogging = DEBUG_LOGGING.get();
         verboseLogging = VERBOSE_LOGGING.get();
+        webhookEnabled = WEBHOOK_ENABLED.get();
         defaultActivityType = DEFAULT_ACTIVITY_TYPE.get();
         updateIntervalTicks = UPDATE_INTERVAL_TICKS.get();
         reconnectIntervalTicks = RECONNECT_INTERVAL_TICKS.get();

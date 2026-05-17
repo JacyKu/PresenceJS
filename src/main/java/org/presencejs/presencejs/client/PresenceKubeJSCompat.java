@@ -13,6 +13,8 @@ public final class PresenceKubeJSCompat {
     private static Method postJoinMethod;
     private static Method postSpectateMethod;
     private static Method postJoinRequestMethod;
+    private static Method postWebhookResponseMethod;
+    private static Method postWebhookErrorMethod;
 
     private PresenceKubeJSCompat() {
     }
@@ -50,6 +52,16 @@ public final class PresenceKubeJSCompat {
         invoke(postJoinRequestMethod, user, secret, approve, deny, ignore);
     }
 
+    public static void postWebhookResponse(
+            long requestId, DiscordWebhookRequest request, DiscordWebhookResponse response) {
+        invoke(postWebhookResponseMethod, Long.valueOf(requestId), request, response);
+    }
+
+    public static void postWebhookError(
+            long requestId, DiscordWebhookRequest request, String message, String errorType) {
+        invoke(postWebhookErrorMethod, Long.valueOf(requestId), request, message, errorType);
+    }
+
     private static boolean loadBridge() {
         if (loadAttempted) {
             return postBuildMethod != null;
@@ -70,6 +82,17 @@ public final class PresenceKubeJSCompat {
                     Runnable.class,
                     Runnable.class,
                     Runnable.class);
+                postWebhookResponseMethod = bridgeClass.getMethod(
+                    "postWebhookResponse",
+                    long.class,
+                    DiscordWebhookRequest.class,
+                    DiscordWebhookResponse.class);
+                postWebhookErrorMethod = bridgeClass.getMethod(
+                    "postWebhookError",
+                    long.class,
+                    DiscordWebhookRequest.class,
+                    String.class,
+                    String.class);
             return true;
         } catch (Throwable throwable) {
             Presencejs.LOGGER.error("Failed to initialize KubeJS compatibility bridge", throwable);

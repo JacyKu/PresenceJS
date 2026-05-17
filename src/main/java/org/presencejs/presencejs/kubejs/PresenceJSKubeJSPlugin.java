@@ -23,6 +23,7 @@ public class PresenceJSKubeJSPlugin extends KubeJSPlugin {
         if (scriptType == ScriptType.CLIENT) {
             classFilter.allow("org.presencejs.presencejs.client");
             classFilter.allow("org.presencejs.presencejs.kubejs");
+            classFilter.allow("com.google.gson");
         }
     }
 }

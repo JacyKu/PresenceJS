@@ -1,6 +1,8 @@
 package org.presencejs.presencejs.kubejs;
 
 import dev.latvian.mods.kubejs.script.ScriptType;
+import org.presencejs.presencejs.client.DiscordWebhookRequest;
+import org.presencejs.presencejs.client.DiscordWebhookResponse;
 import org.presencejs.presencejs.client.PresenceActivity;
 import org.presencejs.presencejs.client.PresenceContext;
 import org.presencejs.presencejs.client.PresenceDiscordUser;
@@ -47,5 +49,19 @@ public final class PresenceKubeJSBridge {
                 ScriptType.CLIENT,
                 new PresenceJoinRequestEventJS(user, secret, approve, deny, ignore));
     }
+
+        public static void postWebhookResponse(
+            long requestId, DiscordWebhookRequest request, DiscordWebhookResponse response) {
+        PresenceJSEvents.WEBHOOK_RESPONSE.post(
+            ScriptType.CLIENT,
+            new PresenceWebhookResponseEventJS(requestId, request, response));
+        }
+
+        public static void postWebhookError(
+            long requestId, DiscordWebhookRequest request, String message, String errorType) {
+        PresenceJSEvents.WEBHOOK_ERROR.post(
+            ScriptType.CLIENT,
+            new PresenceWebhookErrorEventJS(requestId, request, message, errorType));
+        }
 }
 

@@ -1,6 +1,12 @@
 package org.presencejs.presencejs.kubejs;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.presencejs.presencejs.client.DiscordWebhookMessage;
 import org.presencejs.presencejs.client.DiscordRpcService;
+import org.presencejs.presencejs.client.DiscordWebhookService;
 import org.presencejs.presencejs.client.PresenceActivity;
 import org.presencejs.presencejs.client.PresenceContext;
 import org.presencejs.presencejs.client.PresenceDiscordUser;
@@ -24,6 +30,34 @@ public final class PresenceJSBindings {
         image.setKey(key);
         image.setText(text);
         return image;
+    }
+
+    public JsonObject jsonObject() {
+        return new JsonObject();
+    }
+
+    public JsonArray jsonArray() {
+        return new JsonArray();
+    }
+
+    public JsonElement json(String json) {
+        return JsonParser.parseString(json);
+    }
+
+    public DiscordWebhookMessage webhookMessage() {
+        return new DiscordWebhookMessage();
+    }
+
+    public DiscordWebhookMessage.Embed webhookEmbed() {
+        return new DiscordWebhookMessage.Embed();
+    }
+
+    public DiscordWebhookMessage.EmbedField webhookField(String name, String value) {
+        return new DiscordWebhookMessage.EmbedField(name, value);
+    }
+
+    public DiscordWebhookService webhooks() {
+        return DiscordWebhookService.get();
     }
 
     public PresenceContext getContext() {

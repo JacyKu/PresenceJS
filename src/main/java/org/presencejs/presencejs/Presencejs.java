@@ -13,6 +13,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.presencejs.presencejs.client.DiscordRpcService;
+import org.presencejs.presencejs.client.DiscordWebhookService;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -42,6 +43,7 @@ public final class Presencejs {
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
                 DiscordRpcService.get().bootstrap();
+                DiscordWebhookService.get().bootstrap();
                 LOGGER.info("PresenceJS client hooks are ready");
             });
         }
@@ -56,6 +58,7 @@ public final class Presencejs {
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase == TickEvent.Phase.END) {
                 DiscordRpcService.get().tick();
+                DiscordWebhookService.get().tick();
             }
         }
 

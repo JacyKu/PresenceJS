@@ -11,6 +11,8 @@ public interface PresenceJSEvents {
     EventHandler JOIN = GROUP.client("join", () -> PresenceConnectionEventJS.class);
     EventHandler SPECTATE = GROUP.client("spectate", () -> PresenceConnectionEventJS.class);
     EventHandler JOIN_REQUEST = GROUP.client("joinRequest", () -> PresenceJoinRequestEventJS.class);
+    EventHandler WEBHOOK_RESPONSE = GROUP.client("webhookResponse", () -> PresenceWebhookResponseEventJS.class);
+    EventHandler WEBHOOK_ERROR = GROUP.client("webhookError", () -> PresenceWebhookErrorEventJS.class);
 }
 
 

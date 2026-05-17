@@ -79,7 +79,7 @@ public final class DiscordIpcClient implements Closeable {
 
         JsonObject payload = activity == null ? new JsonObject() : activity.deepCopy();
         if (verboseLogging) {
-            Presencejs.LOGGER.debug("Discord RPC -> SET_ACTIVITY {}", payload);
+            // Presencejs.LOGGER.debug("Discord RPC -> SET_ACTIVITY {}", payload);
         }
 
         try {
