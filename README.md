@@ -54,9 +54,6 @@ PresenceJS adds a client-side global binding named `PresenceJS` and an event gro
 - `PresenceJS.activity()` → create a new mutable activity object
 - `PresenceJS.button(label, url)` → create a button object
 - `PresenceJS.image(key, text)` → create an image object
-- `PresenceJS.jsonObject()` / `jsonArray()` / `json(jsonString)` → create or parse Gson JSON payloads for webhook requests
-- `PresenceJS.webhookMessage()` / `webhookEmbed()` / `webhookField(name, value)` → build common webhook message payloads without hand-writing raw JSON
-- `PresenceJS.webhooks()` → access the Discord webhook service
 - `PresenceJS.getContext()` → inspect the latest client snapshot
 - `PresenceJS.getBaseActivity()` / `setBaseActivity(activity)`
 - `PresenceJS.clearBaseActivity()`
@@ -67,17 +64,36 @@ PresenceJS adds a client-side global binding named `PresenceJS` and an event gro
 - `PresenceJS.isEnabled()` / `setEnabled(enabled)`
 - `PresenceJS.refresh()`
 - `PresenceJS.disconnect()`
+- `PresenceJS.jsonObject()` / `jsonArray()` / `json(jsonString)` → create or parse Gson JSON payloads for webhook requests
+- `PresenceJS.webhookMessage()` / `webhookEmbed()` / `webhookField(name, value)` → build common webhook message payloads without hand-writing raw JSON
+- `PresenceJS.webhooks()` → access the Discord webhook service
 
 ### Client events
 
 - `PresenceJSEvents.build(event => {})`
 - `PresenceJSEvents.ready(event => {})`
 - `PresenceJSEvents.disconnected(event => {})`
-- `PresenceJSEvents.join(event => {})`
-- `PresenceJSEvents.spectate(event => {})`
-- `PresenceJSEvents.joinRequest(event => {})`
 - `PresenceJSEvents.webhookResponse(event => {})`
 - `PresenceJSEvents.webhookError(event => {})`
+
+Example build handler:
+
+```js
+PresenceJSEvents.build(event => {
+  const presence = event.getPresence()
+  const context = event.getContext()
+
+  presence.setClientId('123456789012345678')
+  presence.setDetails('Playing Minecraft')
+  presence.setState(context && context.getSingleplayer() ? 'Singleplayer world' : 'In-game')
+  presence.setLargeImage(PresenceJS.image('minecraft', 'Minecraft 1.20.1'))
+  presence.setSmallImage(PresenceJS.image('kubejs', 'Customized with KubeJS'))
+  presence.setButtons([
+    PresenceJS.button('Download Pack', 'https://example.com'),
+    PresenceJS.button('Join Discord', 'https://discord.gg/example')
+  ])
+})
+```
 
 ## Webhooks
 
