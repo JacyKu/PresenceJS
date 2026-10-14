@@ -67,7 +67,7 @@ public final class PresenceDiscordUser {
         } catch (Throwable ignored) {
             defaultAvatarIndex = 0;
         }
-        return "https://discord.com/assets/" + defaultAvatarIndex + ".png";
+        return "https://cdn.discordapp.com/embed/avatars/" + defaultAvatarIndex + ".png";
     }
 
     private static String getString(JsonObject object, String key) {

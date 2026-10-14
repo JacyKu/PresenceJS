@@ -85,13 +85,11 @@ PresenceJSEvents.build(event => {
 
   presence.setClientId('123456789012345678')
   presence.setDetails('Playing Minecraft')
-  presence.setState(context && context.getSingleplayer() ? 'Singleplayer world' : 'In-game')
-  presence.setLargeImage(PresenceJS.image('minecraft', 'Minecraft 1.20.1'))
-  presence.setSmallImage(PresenceJS.image('kubejs', 'Customized with KubeJS'))
-  presence.setButtons([
-    PresenceJS.button('Download Pack', 'https://example.com'),
-    PresenceJS.button('Join Discord', 'https://discord.gg/example')
-  ])
+  presence.setState(context && context.isSingleplayer() ? 'Singleplayer world' : 'In-game')
+  presence.setLargeImage('minecraft', 'Minecraft 1.20.1')
+  presence.setSmallImage('kubejs', 'Customized with KubeJS')
+  presence.addButton(PresenceJS.button('Download Pack', 'https://example.com'))
+  presence.addButton(PresenceJS.button('Join Discord', 'https://discord.gg/example'))
 })
 ```
 
